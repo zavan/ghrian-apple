@@ -44,6 +44,9 @@ targets:
       path: Ghrian/Info.plist
       properties:
         CFBundleDisplayName: Ghrian
+        # An (empty) launch screen opts the iOS app into full-screen rendering on
+        # modern devices — without it iOS letterboxes the app into a smaller region.
+        UILaunchScreen: {}
         # Allow plain-http to a self-hosted server on the local network.
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
