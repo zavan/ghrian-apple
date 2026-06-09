@@ -64,8 +64,7 @@ struct SettingsScreen: View {
             if !isOnboarding {
                 Section("Connection") {
                     LabeledContent("Status") {
-                        Text(model.isConnected ? "Connected" : "Not connected")
-                            .foregroundStyle(model.isConnected ? GhrianColor.online : GhrianColor.textSecondary)
+                        Text(statusText).foregroundStyle(statusColor)
                     }
                     LabeledContent("Last updated", value: GhrianFormat.relativeUpdated(model.lastUpdated))
                     LabeledContent("Inverters", value: "\(model.inverters.count)")
@@ -91,6 +90,18 @@ struct SettingsScreen: View {
             serverURL = model.store.serverURL?.absoluteString ?? ""
             token = model.store.token ?? ""
         }
+    }
+
+    private var statusText: String {
+        if model.errorMessage != nil { "Connection failed" }
+        else if model.lastUpdated != nil { "Connected" }
+        else { "Not connected" }
+    }
+
+    private var statusColor: Color {
+        if model.errorMessage != nil { GhrianColor.offline }
+        else if model.lastUpdated != nil { GhrianColor.online }
+        else { GhrianColor.textSecondary }
     }
 
     private var appVersion: String {

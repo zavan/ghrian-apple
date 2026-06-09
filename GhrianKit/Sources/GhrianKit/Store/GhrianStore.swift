@@ -31,6 +31,13 @@ public final class GhrianStore: @unchecked Sendable {
     private let config: Config
     let defaults: UserDefaults
 
+    /// In-memory copy of the token. The Keychain is the source of truth for persistence,
+    /// but where it's unavailable — e.g. an unsigned iOS Simulator build that has no
+    /// `application-identifier` entitlement, so `SecItemAdd` fails with -34018 — the
+    /// write/read round-trip fails silently. Caching here keeps the app usable for the
+    /// session (the client gets built and requests are sent) even when persistence can't.
+    private var cachedToken: String?
+
     public init(config: Config = Config()) {
         self.config = config
         self.defaults = config.appGroup.flatMap { UserDefaults(suiteName: $0) } ?? .standard
@@ -46,10 +53,12 @@ public final class GhrianStore: @unchecked Sendable {
     // MARK: API token (Keychain)
 
     public var token: String? {
-        get { Keychain.read(service: config.keychainService, accessGroup: config.keychainAccessGroup) }
+        get { cachedToken ?? Keychain.read(service: config.keychainService, accessGroup: config.keychainAccessGroup) }
         set {
-            if let newValue, !newValue.isEmpty {
-                Keychain.write(newValue, service: config.keychainService, accessGroup: config.keychainAccessGroup)
+            let value = (newValue?.isEmpty == false) ? newValue : nil
+            cachedToken = value
+            if let value {
+                Keychain.write(value, service: config.keychainService, accessGroup: config.keychainAccessGroup)
             } else {
                 Keychain.delete(service: config.keychainService, accessGroup: config.keychainAccessGroup)
             }
