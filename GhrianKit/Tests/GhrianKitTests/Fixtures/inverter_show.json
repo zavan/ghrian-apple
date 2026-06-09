@@ -1,0 +1,40 @@
+{
+  "inverter": {
+    "id": 1,
+    "name": "Garage",
+    "device_model": "solis_s5-eh1p5k-l",
+    "mqtt_topic": "ghrian/inverter/01",
+    "serial_number": "SN001",
+    "status": "online",
+    "last_reading_at": "2026-06-09T21:15:00.000Z",
+    "last_seen_at": "2026-06-09T21:15:00.000Z",
+    "latest_values": {
+      "battery_soc": { "value": 80, "unit": "%", "label": "Battery Capacity SOC" },
+      "total_dc_output_power": { "value": 3500.0, "unit": "W", "label": "PV Power" },
+      "household_load_power": { "value": 1200.0, "unit": "W", "label": "Load Power" },
+      "meter_active_power": { "value": -800.0, "unit": "W", "label": "Meter Power" },
+      "battery_power": { "value": 1500.0, "unit": "W", "label": "Battery Power" },
+      "battery_current_direction": { "value": 0, "unit": "", "label": "Battery Direction" },
+      "inverter_temperature": { "value": 24.5, "unit": "°C", "label": "Temperature" },
+      "device_active": { "value": ["phase_a", "phase_c"], "unit": "", "label": "Active Phases" }
+    },
+    "snapshot": {
+      "flows": {
+        "pv":      { "key": "pv", "label": "PV", "watts": 3500.0, "kw": 3.5, "direction": "in" },
+        "grid":    { "key": "grid", "label": "Grid (Importing)", "watts": -800.0, "kw": 0.8, "direction": "in" },
+        "battery": { "key": "battery", "label": "Battery", "watts": 1500.0, "kw": 1.5, "direction": "out" },
+        "load":    { "key": "load", "label": "Load", "watts": 1200.0, "kw": 1.2, "direction": "out" }
+      },
+      "battery_soc": 80,
+      "temperature": 24.5,
+      "today": {
+        "yield": 12.34,
+        "charge": 4.0,
+        "discharge": 2.0,
+        "to_grid": 8.0,
+        "from_grid": 0.5,
+        "consumption": 6.0
+      }
+    }
+  }
+}

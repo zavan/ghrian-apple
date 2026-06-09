@@ -1,0 +1,15 @@
+# Xcode project is generated from project.yml by XcodeGen — don't commit it.
+*.xcodeproj
+
+# Build artifacts
+.build/
+.build-xcode/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+
+# macOS
+.DS_Store
+
+# Secrets / local
+*.xcconfig.local

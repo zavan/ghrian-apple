@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Use the latest installed Xcode
+        run: |
+          latest=$(ls -d /Applications/Xcode_*.app 2>/dev/null | sort -V | tail -1)
+          if [ -n "$latest" ]; then sudo xcode-select -s "$latest"; fi
+          swift --version
+
+      - name: Run GhrianKit tests
+        run: swift test --package-path GhrianKit
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Build (macOS)
+        run: |
+          xcodebuild -project Ghrian.xcodeproj -scheme Ghrian \
+            -destination 'platform=macOS' \
+            CODE_SIGNING_ALLOWED=NO build

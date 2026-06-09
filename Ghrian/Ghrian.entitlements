@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!--
+      Local-dev entitlements: non-sandboxed so the app runs on your Mac with an
+      ad-hoc "Sign to Run Locally" signature — no Apple Developer team required.
+
+      For App Store / device distribution, re-enable App Sandbox and add the
+      App Group + keychain sharing (and set a Development Team):
+        com.apple.security.app-sandbox        = true
+        com.apple.security.network.client     = true
+        com.apple.security.application-groups  = [ group.me.zavan.ghrian ]
+        keychain-access-groups                 = [ $(AppIdentifierPrefix)me.zavan.ghrian.shared ]
+    -->
+    <key>com.apple.security.app-sandbox</key>
+    <false/>
+</dict>
+</plist>

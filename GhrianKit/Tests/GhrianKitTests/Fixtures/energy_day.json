@@ -1,0 +1,15 @@
+{
+  "inverter_id": 1,
+  "period": "day",
+  "date": "2026-06-09",
+  "label": "09/06/2026",
+  "range": { "from": "2026-06-09", "to": "2026-06-09" },
+  "currency": "$",
+  "tariff_configured": true,
+  "totals": {
+    "generation": 12.0, "self_consumption": 4.0, "feed_in": 8.0,
+    "import": 0.5, "consumption": 4.0, "charge": 1.0, "discharge": 1.5
+  },
+  "costs": { "import_cost": 0.15, "export_earnings": 0.8, "net": 0.65, "savings": 1.2 },
+  "breakdown": null
+}
