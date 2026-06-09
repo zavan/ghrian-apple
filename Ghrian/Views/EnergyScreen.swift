@@ -7,6 +7,7 @@ struct EnergyScreen: View {
     @Environment(AppModel.self) private var model
 
     @State private var period: EnergyPeriod = .day
+    @State private var anchorDate = Date()
     @State private var report: EnergyReport?
     @State private var loading = false
 
@@ -17,6 +18,8 @@ struct EnergyScreen: View {
                     ForEach(EnergyPeriod.allCases) { Text($0.title).tag($0) }
                 }
                 .pickerStyle(.segmented)
+
+                if period != .lifetime { periodNav }
 
                 Card(periodLabel, systemImage: "chart.bar.fill") {
                     if let report {
@@ -32,8 +35,8 @@ struct EnergyScreen: View {
                     }
                 }
 
-                if let id = focusInverterID {
-                    IntradayChartsView(inverterID: id)
+                if let id = focusInverterID, period == .day {
+                    IntradayChartsView(inverterID: id, date: anchorDate)
                 }
             }
             .padding()
@@ -46,11 +49,52 @@ struct EnergyScreen: View {
         .navigationBarTitleDisplayMode(.inline)
         #endif
         .inverterToolbar()
-        .task(id: "\(model.selection.storageValue)-\(period.rawValue)") {
+        .onChange(of: period) { _, _ in anchorDate = Date() }
+        .task(id: "\(model.selection.storageValue)-\(period.rawValue)-\(anchorDate.timeIntervalSinceReferenceDate)") {
             loading = true
-            report = await model.energy(inverterID: model.selection.inverterID, period: period, date: Date())
+            report = await model.energy(inverterID: model.selection.inverterID, period: period, date: anchorDate)
             loading = false
         }
+    }
+
+    /// Prev/next date navigation with the server-provided period label (mirrors the
+    /// dashboard's period nav). "Next" stops at the current period — no future data.
+    private var periodNav: some View {
+        HStack {
+            Button { step(-1) } label: { Image(systemName: "chevron.left") }
+                .buttonStyle(.glass)
+            Spacer()
+            Text(report?.label ?? " ")
+                .font(.subheadline.weight(.medium))
+                .monospacedDigit()
+                .contentTransition(.numericText())
+            Spacer()
+            Button { step(1) } label: { Image(systemName: "chevron.right") }
+                .buttonStyle(.glass)
+                .disabled(isAtCurrentPeriod)
+        }
+        .padding(.horizontal, 4)
+    }
+
+    private func step(_ direction: Int) {
+        let component: Calendar.Component = switch period {
+        case .month: .month
+        case .year: .year
+        default: .day
+        }
+        if let shifted = Calendar.current.date(byAdding: component, value: direction, to: anchorDate) {
+            anchorDate = shifted
+        }
+    }
+
+    /// True when the anchor sits in the current day/month/year — so "next" is disabled.
+    private var isAtCurrentPeriod: Bool {
+        let component: Calendar.Component = switch period {
+        case .month: .month
+        case .year: .year
+        default: .day
+        }
+        return Calendar.current.isDate(anchorDate, equalTo: Date(), toGranularity: component)
     }
 
     private var periodLabel: String { report?.label ?? period.title }

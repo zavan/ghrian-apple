@@ -6,6 +6,7 @@ import GhrianKit
 struct IntradayChartsView: View {
     @Environment(AppModel.self) private var model
     let inverterID: Int
+    var date: Date = Date()
 
     @State private var series: IntradaySeries?
     @State private var loaded = false
@@ -31,9 +32,9 @@ struct IntradayChartsView: View {
                     .padding(.vertical, 8)
             }
         }
-        .task(id: inverterID) {
+        .task(id: "\(inverterID)-\(date.timeIntervalSinceReferenceDate)") {
             loaded = false
-            series = await model.intraday(inverterID: inverterID, date: Date())
+            series = await model.intraday(inverterID: inverterID, date: date)
             loaded = true
         }
     }

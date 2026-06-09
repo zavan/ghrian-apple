@@ -38,11 +38,11 @@ struct PowerFlowDiagram: View {
                 }
 
                 // The hub + node discs float in Liquid Glass above the flow lines (content).
-                GlassEffectContainer(spacing: 8) {
-                    hubView.position(hub)
-                    ForEach(flows) { flow in
-                        nodeView(flow).position(position(flow.key, in: size))
-                    }
+                // Positioned individually in the ZStack — a GlassEffectContainer would
+                // re-anchor these to its own bounds and scatter them.
+                hubView.position(hub)
+                ForEach(flows) { flow in
+                    nodeView(flow).position(position(flow.key, in: size))
                 }
             }
         }
