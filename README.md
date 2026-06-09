@@ -12,13 +12,17 @@ to show live solar power flow, daily energy, and intraday charts. Includes a **w
   models (decode the `/api/v1` responses), the Keychain + App-Group store, the
   site-wide flow aggregate, and design tokens/formatters mirroring the web. Pure and
   unit-tested (`swift test`).
-- **`Ghrian/`** — the app target (one multiplatform target: macOS + iOS + iPadOS).
-  Dashboard, live `PowerFlowDiagram` (Canvas + `TimelineView`), battery ring, today
-  grid, Swift Charts intraday, period energy + costs, settings, and the macOS
-  `MenuBarExtra`.
+- **`Ghrian/`** — the app target (one multiplatform target: macOS + iOS + iPadOS), built on
+  Apple's **Liquid Glass** design system (min **iOS/iPadOS 26 + macOS 26**). An `AppShell`
+  adapts the navigation — a glass `TabView` on iPhone, a `NavigationSplitView` sidebar on
+  iPad/Mac — over an Overview screen (live `PowerFlowDiagram` hero, battery ring, today grid),
+  an Energy screen (Swift Charts intraday + period totals/costs), a `Form`-based Settings
+  screen, and the macOS `MenuBarExtra`. The content layer follows the system light/dark
+  appearance; only controls float in glass.
 - **`GhrianWidget/`** — WidgetKit extension showing **today's energy** (slowly-changing,
-  so it fits the widget refresh budget — live flow stays in the app/menu-bar).
-  AppIntent-configurable per-widget inverter (incl. "All").
+  so it fits the widget refresh budget — live flow stays in the app/menu-bar). Home-screen
+  (`systemSmall`/`systemMedium`) + lock-screen (`accessoryRectangular`/`accessoryCircular`)
+  families, AppIntent-configurable per-widget inverter (incl. "All").
 - **`Shared/`** — `AppConfig` (bundle/App-Group identifiers) shared by app + widget.
 
 ## Build

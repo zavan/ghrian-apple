@@ -37,10 +37,12 @@ struct PowerFlowDiagram: View {
                     }
                 }
 
-                hubView.position(hub)
-
-                ForEach(flows) { flow in
-                    nodeView(flow).position(position(flow.key, in: size))
+                // The hub + node discs float in Liquid Glass above the flow lines (content).
+                GlassEffectContainer(spacing: 8) {
+                    hubView.position(hub)
+                    ForEach(flows) { flow in
+                        nodeView(flow).position(position(flow.key, in: size))
+                    }
                 }
             }
         }
@@ -49,28 +51,28 @@ struct PowerFlowDiagram: View {
     }
 
     private var hubView: some View {
-        ZStack {
-            Circle().fill(GhrianColor.card)
-            Circle().strokeBorder(GhrianColor.inverter, lineWidth: 2)
-            Image(systemName: "cpu").foregroundStyle(GhrianColor.inverter)
-        }
-        .frame(width: 52, height: 52)
+        Image(systemName: "cpu")
+            .foregroundStyle(GhrianColor.inverter)
+            .frame(width: 52, height: 52)
+            .glassEffect(.regular.tint(GhrianColor.inverter.opacity(0.18)), in: .circle)
+            .overlay(Circle().strokeBorder(GhrianColor.inverter, lineWidth: 1.5))
     }
 
     private func nodeView(_ flow: Flow) -> some View {
         let color = GhrianColor.flow(flow.key)
         return VStack(spacing: 3) {
-            ZStack {
-                Circle().fill(GhrianColor.card)
-                Circle().strokeBorder(color, lineWidth: 2)
-                Image(systemName: icon(flow.key)).foregroundStyle(color)
-            }
-            .frame(width: 46, height: 46)
+            Image(systemName: icon(flow.key))
+                .foregroundStyle(color)
+                .frame(width: 46, height: 46)
+                .glassEffect(.regular.tint(color.opacity(0.18)), in: .circle)
+                .overlay(Circle().strokeBorder(color, lineWidth: 1.5))
             Text(GhrianFormat.kw(flow.kw))
                 .font(.caption2.weight(.medium))
                 .foregroundStyle(GhrianColor.textPrimary)
                 .monospacedDigit()
+                .contentTransition(.numericText())
         }
+        .animation(.snappy, value: flow.watts)
     }
 
     private func position(_ key: String, in size: CGSize) -> CGPoint {

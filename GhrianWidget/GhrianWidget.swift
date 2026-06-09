@@ -73,6 +73,20 @@ struct GhrianWidgetEntryView: View {
     let entry: DailyEntry
 
     var body: some View {
+        #if os(iOS)
+        switch family {
+        case .accessoryCircular: circular
+        case .accessoryRectangular: rectangular
+        default: home
+        }
+        #else
+        home
+        #endif
+    }
+
+    // MARK: Home-screen (systemSmall / systemMedium)
+
+    private var home: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 5) {
                 Image(systemName: "sun.max.fill").foregroundStyle(GhrianColor.inverter)
@@ -107,16 +121,51 @@ struct GhrianWidgetEntryView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
+
+    // MARK: Lock-screen accessories (iOS only — monochrome, the system tints these)
+
+    #if os(iOS)
+    private var rectangular: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Label(entry.title, systemImage: "sun.max.fill")
+                .font(.caption.weight(.semibold)).lineLimit(1)
+            if let today = entry.today {
+                Text("Yield \(GhrianFormat.kwh(today.generation))").font(.caption2)
+                HStack(spacing: 6) {
+                    Text("Use \(GhrianFormat.kwh(today.consumption))")
+                    if let soc = entry.soc { Text("· \(GhrianFormat.percent(soc))") }
+                }
+                .font(.caption2)
+            } else {
+                Text(entry.failed ? "Not connected" : "No data").font(.caption2)
+            }
+        }
+        .widgetAccentable()
+    }
+
+    private var circular: some View {
+        Gauge(value: (entry.soc ?? 0) / 100) {
+            Image(systemName: "battery.100percent")
+        } currentValueLabel: {
+            Text(entry.soc.map { "\(Int($0.rounded()))" } ?? "—")
+        }
+        .gaugeStyle(.accessoryCircular)
+    }
+    #endif
 }
 
 struct GhrianDailyWidget: Widget {
     var body: some WidgetConfiguration {
         AppIntentConfiguration(kind: "GhrianDailyWidget", intent: SelectInverterIntent.self, provider: Provider()) { entry in
             GhrianWidgetEntryView(entry: entry)
-                .containerBackground(GhrianColor.background, for: .widget)
+                .containerBackground(.fill.tertiary, for: .widget)
         }
         .configurationDisplayName("Today's Energy")
         .description("Daily generation, consumption, and battery for an inverter.")
+        #if os(iOS)
+        .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular, .accessoryCircular])
+        #else
         .supportedFamilies([.systemSmall, .systemMedium])
+        #endif
     }
 }

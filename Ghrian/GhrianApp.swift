@@ -28,6 +28,12 @@ struct GhrianApp: App {
             MenuBarLabel(model: model)
         }
         .menuBarExtraStyle(.window)
+
+        Settings {
+            SettingsScreen()
+                .environment(model)
+                .frame(width: 460, height: 520)
+        }
         #endif
     }
 }

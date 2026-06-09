@@ -1,23 +1,39 @@
 #if canImport(SwiftUI)
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#elseif canImport(AppKit)
+import AppKit
+#endif
 
-/// Semantic colors mirroring the web frontend's Tailwind palette (dark theme).
+/// The ghrian palette. Two kinds of token:
+///
+/// - **Accents** (`pv`/`grid`/`battery`/`load`/…) are fixed brand colors that read on
+///   both light and dark — they tint content the same everywhere.
+/// - **Structural** tokens (`background`/`card`/`cardBorder`/text) are **adaptive**: they
+///   map to platform system colors so the flat *content layer* follows the system
+///   appearance. The floating Liquid Glass control layer comes from `.glassEffect` and
+///   the standard components, not from a fill here.
 public enum GhrianColor {
-    public static let pv = Color(hex: 0xEAB308)        // yellow-500 — solar
-    public static let grid = Color(hex: 0x38BDF8)      // sky-400 — grid
-    public static let battery = Color(hex: 0x22C55E)   // green-500 — storage
-    public static let load = Color(hex: 0xA855F7)      // purple-500 — consumption
-    public static let inverter = Color(hex: 0xF59E0B)  // amber-500 — hub
-    public static let importColor = Color(hex: 0xF87171) // red-400 — import cost
+    // MARK: Fixed accents (mirror the web Tailwind palette)
 
-    public static let background = Color(hex: 0x0F172A)   // slate-900
-    public static let card = Color(hex: 0x1E293B)         // slate-800
-    public static let cardBorder = Color(hex: 0x334155)   // slate-700
-    public static let textPrimary = Color(hex: 0xF1F5F9)  // slate-100
-    public static let textSecondary = Color(hex: 0x94A3B8) // slate-400
+    public static let pv = Color(hex: 0xEAB308)          // yellow-500 — solar
+    public static let grid = Color(hex: 0x38BDF8)        // sky-400 — grid
+    public static let battery = Color(hex: 0x22C55E)     // green-500 — storage
+    public static let load = Color(hex: 0xA855F7)        // purple-500 — consumption
+    public static let inverter = Color(hex: 0xF59E0B)    // amber-500 — hub
+    public static let importColor = Color(hex: 0xF87171) // red-400 — import cost
 
     public static let online = Color(hex: 0x22C55E)
     public static let offline = Color(hex: 0xF87171)
+
+    // MARK: Adaptive structural tokens (the content layer, follows light/dark)
+
+    public static var background: Color { platformGroupedBackground }
+    public static var card: Color { platformSecondaryGroupedBackground }
+    public static var cardBorder: Color { platformSeparator }
+    public static var textPrimary: Color { .primary }
+    public static var textSecondary: Color { .secondary }
 
     /// Color for a flow node by its key ("pv"/"grid"/"battery"/"load").
     public static func flow(_ key: String) -> Color {
@@ -36,6 +52,38 @@ public enum GhrianColor {
         case .offline: offline
         case .unknown: textSecondary
         }
+    }
+
+    // MARK: Platform system colors
+
+    private static var platformGroupedBackground: Color {
+        #if canImport(UIKit)
+        Color(uiColor: .systemGroupedBackground)
+        #elseif canImport(AppKit)
+        Color(nsColor: .windowBackgroundColor)
+        #else
+        Color.gray.opacity(0.12)
+        #endif
+    }
+
+    private static var platformSecondaryGroupedBackground: Color {
+        #if canImport(UIKit)
+        Color(uiColor: .secondarySystemGroupedBackground)
+        #elseif canImport(AppKit)
+        Color(nsColor: .controlBackgroundColor)
+        #else
+        Color.gray.opacity(0.2)
+        #endif
+    }
+
+    private static var platformSeparator: Color {
+        #if canImport(UIKit)
+        Color(uiColor: .separator)
+        #elseif canImport(AppKit)
+        Color(nsColor: .separatorColor)
+        #else
+        Color.gray.opacity(0.3)
+        #endif
     }
 }
 

@@ -46,6 +46,28 @@ final class AggregateAndFormatTests: XCTestCase {
         XCTAssertEqual(GhrianFormat.money(-1.2, currency: "$"), "-$1.20")
     }
 
+    func testRelativeUpdated() {
+        let now = Date(timeIntervalSinceReferenceDate: 100_000)
+        XCTAssertEqual(GhrianFormat.relativeUpdated(nil, now: now), "Never updated")
+        XCTAssertEqual(GhrianFormat.relativeUpdated(now.addingTimeInterval(-2), now: now), "Updated just now")
+        XCTAssertEqual(GhrianFormat.relativeUpdated(now.addingTimeInterval(-12), now: now), "Updated 12s ago")
+        XCTAssertEqual(GhrianFormat.relativeUpdated(now.addingTimeInterval(-300), now: now), "Updated 5m ago")
+        XCTAssertEqual(GhrianFormat.relativeUpdated(now.addingTimeInterval(-7200), now: now), "Updated 2h ago")
+        XCTAssertEqual(GhrianFormat.relativeUpdated(now.addingTimeInterval(-259_200), now: now), "Updated 3d ago")
+        // A future timestamp (clock skew) clamps to "just now" rather than going negative.
+        XCTAssertEqual(GhrianFormat.relativeUpdated(now.addingTimeInterval(30), now: now), "Updated just now")
+    }
+
+    func testGridHeadline() {
+        func grid(_ kw: Double?, _ dir: FlowDirection) -> Flow {
+            Flow(key: "grid", label: "Grid", watts: kw.map { $0 * 1000 }, kw: kw, direction: dir)
+        }
+        XCTAssertEqual(GhrianFormat.gridHeadline(grid(1.2, .incoming)), GridHeadline(title: "Importing", value: "1.2 kW"))
+        XCTAssertEqual(GhrianFormat.gridHeadline(grid(0.8, .outgoing)), GridHeadline(title: "Exporting", value: "0.8 kW"))
+        XCTAssertEqual(GhrianFormat.gridHeadline(grid(0, .idle)), GridHeadline(title: "Grid idle", value: "0 kW"))
+        XCTAssertEqual(GhrianFormat.gridHeadline(nil), GridHeadline(title: "Grid idle", value: "—"))
+    }
+
     func testSelectionRoundTrips() {
         XCTAssertEqual(InverterSelection(storageValue: "all"), .all)
         XCTAssertEqual(InverterSelection(storageValue: "inv:7"), .inverter(7))

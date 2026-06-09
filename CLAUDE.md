@@ -27,6 +27,14 @@ inverter ──Modbus──▶ [agent] ──MQTT──▶ [server] ──HTTP /
 - **Explicit `CodingKeys`, never `convertFromSnakeCase`.** The raw `latest_values`
   map uses arbitrary snake_case metric keys as *dictionary keys* — key conversion
   would mangle them. Every model spells out its keys.
+- **Liquid Glass, min OS 26.** The UI is built on Apple's Liquid Glass design system and
+  deploys to **iOS/iPadOS 26 + macOS 26** (so glass APIs need no `if #available`). Keep the
+  two-layer model: charts/readouts/lists live on the flat, system-**adaptive** content layer
+  (`GhrianColor` structural tokens map to platform system colors — light & dark, never forced);
+  only navigation and controls float in glass. Don't stack glass on glass — let standard
+  components (`TabView`, toolbars, `NavigationSplitView` sidebar, `Form`, `.buttonStyle(.glass)`)
+  adopt it automatically; reach for `.glassEffect`/`GlassEffectContainer` only for custom
+  floating clusters (e.g. the power-flow discs, the status badge).
 - **Widget shows daily data, not live.** WidgetKit's ~15–30 min refresh budget can't
   track the 30s poll, so the widget surfaces today's slowly-changing energy + SOC.
   Live power flow lives in the app + menu-bar, which **poll** (there is no client
@@ -54,9 +62,11 @@ inverter ──Modbus──▶ [agent] ──MQTT──▶ [server] ──HTTP /
   - `Design/` — `GhrianColor` (web Tailwind palette) + `GhrianFormat` (kW/kWh/%/money).
   - `Aggregate/` — `CombinedSnapshot` (the `.all` site-wide flow sum).
 - **`Ghrian/`** — the app target (one multiplatform target). `GhrianApp` (WindowGroup +
-  macOS `MenuBarExtra`), `AppModel` (`@Observable`, polling), `Views/` (dashboard,
-  `PowerFlowDiagram`, `BatteryRing`, `TodayEnergyGrid`, `IntradayChartsView`,
-  `EnergySection`, `SettingsView`, theme), `MenuBar/`, `Assets.xcassets` (app icon).
+  macOS `MenuBarExtra` + macOS `Settings` scene), `AppModel` (`@Observable`, polling), `Views/`
+  — `RootView` (lifecycle) → `AppShell` (compact `TabView` / regular `NavigationSplitView` +
+  `InverterPicker`), `OverviewScreen` (live hero), `EnergyScreen`, `SettingsScreen` (`Form`),
+  `PowerFlowDiagram`, `BatteryRing`, `TodayEnergyGrid`, `IntradayChartsView`, `Theme` (adaptive
+  `Card`, `StatusBadge`, `PulsingDot`) — plus `MenuBar/`, `Assets.xcassets` (app icon).
 - **`GhrianWidget/`** — WidgetKit extension: `Provider` (AppIntent timeline), the daily
   view, and `SelectInverterIntent` (config picker backed by the App-Group inverter cache).
 - **`Shared/`** — `AppConfig` (ids), compiled into both app + widget.

@@ -4,8 +4,8 @@ import PackageDescription
 let package = Package(
     name: "GhrianKit",
     platforms: [
-        .macOS(.v14),
-        .iOS(.v17)
+        .macOS("26.0"),
+        .iOS("26.0")
     ],
     products: [
         .library(name: "GhrianKit", targets: ["GhrianKit"])

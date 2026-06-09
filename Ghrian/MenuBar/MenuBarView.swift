@@ -60,9 +60,10 @@ struct MenuBarView: View {
             }
             Spacer()
             Button { Task { await model.wrappedValue.load() } } label: { Image(systemName: "arrow.clockwise") }
-                .buttonStyle(.borderless)
+                .buttonStyle(.glass)
+                .disabled(model.wrappedValue.isLoading)
             Button { NSApp.terminate(nil) } label: { Image(systemName: "power") }
-                .buttonStyle(.borderless)
+                .buttonStyle(.glass)
         }
         .padding(10)
     }
@@ -80,7 +81,8 @@ struct MenuBarView: View {
         HStack {
             Text(label).font(.caption).foregroundStyle(GhrianColor.textSecondary)
             Spacer()
-            Text(value).font(.caption.weight(.medium)).foregroundStyle(color).monospacedDigit()
+            Text(value).font(.caption.weight(.medium)).foregroundStyle(color)
+                .monospacedDigit().contentTransition(.numericText())
         }
     }
 

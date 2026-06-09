@@ -1,41 +1,63 @@
 import SwiftUI
 import GhrianKit
 
-/// Period energy totals + costs (matches the web `_aggregates`): a Day/Month/Year/
-/// Lifetime picker over `/energy` (per-inverter or site-wide when inverterID is nil).
-struct EnergySection: View {
+/// Period energy + costs (Day/Month/Year/Lifetime) over `/energy`, plus the full intraday
+/// charts. Honors the shared selection (per-inverter, or site-wide for "All").
+struct EnergyScreen: View {
     @Environment(AppModel.self) private var model
-    let inverterID: Int?
 
     @State private var period: EnergyPeriod = .day
     @State private var report: EnergyReport?
     @State private var loading = false
 
     var body: some View {
-        Card("Energy", systemImage: "chart.bar.fill") {
-            Picker("Period", selection: $period) {
-                ForEach(EnergyPeriod.allCases) { Text($0.title).tag($0) }
-            }
-            .pickerStyle(.segmented)
-
-            if let report {
-                Text(report.label).font(.caption).foregroundStyle(GhrianColor.textSecondary)
-                EnergyTotalsGrid(totals: report.totals)
-                if report.tariffConfigured {
-                    CostCards(costs: report.costs, currency: report.currency)
+        ScrollView {
+            VStack(spacing: 16) {
+                Picker("Period", selection: $period) {
+                    ForEach(EnergyPeriod.allCases) { Text($0.title).tag($0) }
                 }
-            } else {
-                Text(loading ? "Loading…" : "No data")
-                    .font(.callout)
-                    .foregroundStyle(GhrianColor.textSecondary)
-                    .padding(.vertical, 8)
+                .pickerStyle(.segmented)
+
+                Card(periodLabel, systemImage: "chart.bar.fill") {
+                    if let report {
+                        EnergyTotalsGrid(totals: report.totals)
+                        if report.tariffConfigured {
+                            CostCards(costs: report.costs, currency: report.currency)
+                        }
+                    } else {
+                        Text(loading ? "Loading…" : "No data")
+                            .font(.callout)
+                            .foregroundStyle(GhrianColor.textSecondary)
+                            .padding(.vertical, 8)
+                    }
+                }
+
+                if let id = focusInverterID {
+                    IntradayChartsView(inverterID: id)
+                }
             }
+            .padding()
+            .frame(maxWidth: 720)
+            .frame(maxWidth: .infinity)
         }
-        .task(id: "\(inverterID ?? -1)-\(period.rawValue)") {
+        .background(GhrianColor.background)
+        .navigationTitle("Energy")
+        #if os(iOS)
+        .navigationBarTitleDisplayMode(.inline)
+        #endif
+        .inverterToolbar()
+        .task(id: "\(model.selection.storageValue)-\(period.rawValue)") {
             loading = true
-            report = await model.energy(inverterID: inverterID, period: period, date: Date())
+            report = await model.energy(inverterID: model.selection.inverterID, period: period, date: Date())
             loading = false
         }
+    }
+
+    private var periodLabel: String { report?.label ?? period.title }
+
+    /// The intraday endpoint is per-inverter; for "All" we chart the first inverter.
+    private var focusInverterID: Int? {
+        model.selection.inverterID ?? model.inverters.first?.id
     }
 }
 
